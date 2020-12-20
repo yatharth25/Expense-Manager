@@ -59,6 +59,8 @@ class _MyHomePageState extends State<MyHomePage> {
     //   dateTime: DateTime.now(),
     // ),
   ];
+  bool _showChart = false;
+
   List<Transaction> get _recentTransactions {
     return _usertransaction.where((tx) {
       return tx.dateTime.isAfter(DateTime.now().subtract(Duration(days: 7)));
@@ -93,22 +95,60 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final landscape = mediaQuery.orientation == Orientation.landscape;
+    final appBar = AppBar(
+      title: Text('Money Mate'),
+      backgroundColor: Theme.of(context).primaryColor,
+      actions: [
+        IconButton(
+            icon: Icon(Icons.add), onPressed: () => _startNewTransc(context))
+      ],
+    );
+    final trnsListWidget = Container(
+        height: (mediaQuery.size.height -
+                appBar.preferredSize.height -
+                mediaQuery.padding.top) *
+            0.7,
+        child: TransactionList(_usertransaction, _deleteTransaction));
     return Scaffold(
-      appBar: AppBar(
-        title: Text('Money Mate'),
-        backgroundColor: Theme.of(context).primaryColor,
-        actions: [
-          IconButton(
-              icon: Icon(Icons.add), onPressed: () => _startNewTransc(context))
-        ],
-      ),
+      appBar: appBar,
       body: SingleChildScrollView(
         child: Column(
           //mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
-            Chart(_recentTransactions),
-            TransactionList(_usertransaction, _deleteTransaction),
+            if (landscape)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text('Show Chart'),
+                  Switch(
+                      value: _showChart,
+                      onChanged: (val) {
+                        setState(() {
+                          _showChart = val;
+                        });
+                      })
+                ],
+              ),
+            if (!landscape)
+              Container(
+                  height: (mediaQuery.size.height -
+                          appBar.preferredSize.height -
+                          mediaQuery.padding.top) *
+                      0.3,
+                  child: Chart(_recentTransactions)),
+            if (!landscape) trnsListWidget,
+            if (landscape)
+              _showChart
+                  ? Container(
+                      height: (mediaQuery.size.height -
+                              appBar.preferredSize.height -
+                              mediaQuery.padding.top) *
+                          0.7,
+                      child: Chart(_recentTransactions))
+                  : trnsListWidget
           ],
         ),
       ),

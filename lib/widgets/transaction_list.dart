@@ -14,10 +14,9 @@ class TransactionList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      height: gethieght(context)- 250,
-      child: transactions.isEmpty
-          ? Column(
+    return transactions.isEmpty
+        ? LayoutBuilder(builder: (ctx, constraints) {
+            return Column(
               children: [
                 Text(
                   'No transactions added yet!',
@@ -28,45 +27,51 @@ class TransactionList extends StatelessWidget {
                   height: 30,
                 ),
                 Container(
-                  height: gethieght(context) - 450,
+                  height: constraints.maxHeight * 0.6,
                   child: Image.asset(
                     'assets/images/waiting.png',
                     fit: BoxFit.cover,
                   ),
                 ),
               ],
-            )
-          : ListView.builder(
-              itemBuilder: (ctx, index) {
-                return Card(
-                  elevation: 5,
-                  margin: EdgeInsets.symmetric(vertical: 7, horizontal: 5),
-                  child: ListTile(
-                    leading: CircleAvatar(
-                      radius: 30,
-                      child: Padding(
-                        padding: EdgeInsets.all(6),
-                        child: FittedBox(
-                            child: Text('\u20B9${transactions[index].amount}')),
-                      ),
+            );
+          })
+        : ListView.builder(
+            itemBuilder: (ctx, index) {
+              return Card(
+                elevation: 5,
+                margin: EdgeInsets.symmetric(vertical: 7, horizontal: 5),
+                child: ListTile(
+                  leading: CircleAvatar(
+                    radius: 30,
+                    child: Padding(
+                      padding: EdgeInsets.all(6),
+                      child: FittedBox(
+                          child: Text('\u20B9${transactions[index].amount}')),
                     ),
-                    // ignore: deprecated_member_use
-                    title: Text(
-                      transactions[index].title,
-                      // ignore: deprecated_member_use
-                      style: Theme.of(context).textTheme.title,
-                    ),
-                    subtitle: Text(DateFormat.yMMMd()
-                        .format(transactions[index].dateTime)),
-                    trailing: IconButton(
-                        icon: Icon(Icons.delete),
-                        color: Theme.of(context).errorColor,
-                        onPressed: () => deleteTx(transactions[index].id)),
                   ),
-                );
-              },
-              itemCount: transactions.length,
-            ),
-    );
+                  // ignore: deprecated_member_use
+                  title: Text(
+                    transactions[index].title,
+                    // ignore: deprecated_member_use
+                    style: Theme.of(context).textTheme.title,
+                  ),
+                  subtitle: Text(
+                      DateFormat.yMMMd().format(transactions[index].dateTime)),
+                  trailing: MediaQuery.of(context).size.width > 400
+                      ? FlatButton.icon(
+                          icon: Icon(Icons.delete),
+                          label: Text('Delete'),
+                          textColor: Theme.of(context).errorColor,
+                          onPressed: () => deleteTx(transactions[index].id))
+                      : IconButton(
+                          icon: Icon(Icons.delete),
+                          color: Theme.of(context).errorColor,
+                          onPressed: () => deleteTx(transactions[index].id)),
+                ),
+              );
+            },
+            itemCount: transactions.length,
+          );
   }
 }
